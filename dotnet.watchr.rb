@@ -4,6 +4,7 @@ require './watcher_dot_net.rb'
 #http://www.github.com/amirrajan/specwatchr
 #Copyright (c) 2011 Amir Rajan, Matt Florence
 #Copyright (c) 2011 The NSpec Development Team
+#Modded by Bryan Kahlig for the use of MSTest on VB .NET and C# projects
 
 =begin
  _______ _________ _______  _______ _________              _______  _______  _______ 
@@ -220,7 +221,7 @@ def tutorial
 end
 
 def file_changed full_path
-  if full_path =~ /.*.\.cs$/
+  if full_path =~ /.*.\.(vb|cs)$/
     handle full_path
   end
 

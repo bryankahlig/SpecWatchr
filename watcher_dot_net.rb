@@ -72,6 +72,7 @@ class MSBuilder
 
   def build_cmd file
     "\"#{MSBuilder.ms_build_path}\" \"#{file}\" /verbosity:quiet /nologo"
+	#"\"#{MSBuilder.ms_build_path}\" \"#{file}\" /nologo"
   end
 
   def self.ms_build_path
@@ -162,12 +163,24 @@ class TestRunner
     test_dll
   end
 
+  def get_file_basename(file_name)
+	if file_name =~ /.*.\.cs$/
+		return File.basename(file_name, ".cs")
+	else
+		if file_name =~ /.*.\.vb$/
+			return File.basename(file_name, ".vb")
+		else
+			return file_name
+		end
+	end
+  end
+  
   def find file
-    return nil if [/\.sln$/, /\.csproj$/].any? { |pattern| file.match(pattern) }
+    return nil if [/\.sln$/, /\.(vb|cs)proj$/].any? { |pattern| file.match(pattern) }
 
     return nil if !file.match(/\./)
 
-    just_file_name = File.basename(file, ".cs")
+	just_file_name = get_file_basename(file)
 
     just_file_name = just_file_name.split(".").first
     
@@ -207,7 +220,7 @@ class NSpecRunner < TestRunner
   def find file
     return nil if super(file) == nil
 
-    just_file_name = File.basename(file, ".cs")
+    just_file_name = get_file_basename(file)
     
     if(contained_in_test_project(file))
       return just_file_name
@@ -786,12 +799,12 @@ class WatcherDotNet
 
   def unsupported_solution_structure?
     files = Dir.entries(@folder)
-    return files.any? { |f| /\.sln$/.match(f) } && files.any? { |f| /\.csproj$/.match(f) }  
+    return files.any? { |f| /\.sln$/.match(f) } && files.any? { |f| /\.(cs|vb)proj$/.match(f) }  
   end
     
   def consider file
     if(unsupported_solution_structure?)
-      @notifier.execute "specwatchr", "The solution structure you have is unsupported by specwatchr.  CS Projects need to be in their own directories (as opposed to .csproj's existing at the same level as the .sln file).  If this is a new project, go back and recreate it...but this time make sure that the \"Create directory for solution\" check box is checked.", "red"
+      @notifier.execute "specwatchr", "The solution structure you have is unsupported by specwatchr.  CS/VB Projects need to be in their own directories (as opposed to .csproj's existing at the same level as the .sln file).  If this is a new project, go back and recreate it...but this time make sure that the \"Create directory for solution\" check box is checked.", "red"
       return
     end
 
@@ -816,7 +829,7 @@ class WatcherDotNet
     end
 
     if @test_runner.test_dlls.count == 0
-      @notifier.execute "discovery", "specwatchr didn't find any test dll's. specwatchr looks for a .csproj that ends in Test, Tests, Spec, or Specs.  If you do have that, stop specwatchr, rebuild your solution and start specwatchr back up. If you want to explicitly specify the test dll's, you can do so via dotnet.watchr.rb.", "red"
+      @notifier.execute "discovery", "specwatchr didn't find any test dll's. specwatchr looks for a .csproj/.vbproj that ends in Test, Tests, Spec, or Specs.  If you do have that, stop specwatchr, rebuild your solution and start specwatchr back up. If you want to explicitly specify the test dll's, you can do so via dotnet.watchr.rb.", "red"
 
       puts "===================== done consider ========================"
       return
