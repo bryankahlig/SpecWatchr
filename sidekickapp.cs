@@ -14,6 +14,8 @@ namespace SyncDeploy
 
         static void Main(string[] args)
         {
+            Console.WriteLine("Starting Growl.");
+            startGrowl();
             path = Directory.GetCurrentDirectory();
             watcher = new FileSystemWatcher(path, "*.*");
             watcher.IncludeSubdirectories = true;
@@ -56,6 +58,23 @@ namespace SyncDeploy
             System.Console.WriteLine("Changed: " + relativeFile);
             Shell("file_changed", relativeFile);
             watcher.EnableRaisingEvents = true;
+        }
+		
+		
+        static void startGrowl()
+        {
+            string growlX86Path = "C:\\Program Files\\Growl for Windows\\growl.exe";
+            string growl64Path = "C:\\Program Files (x86)\\Growl for Windows\\growl.exe";
+            string path2execute = String.Empty;
+            if (System.IO.File.Exists(growl64Path))
+            {
+                path2execute = growl64Path;
+            }
+            else
+            {
+                path2execute = growlX86Path;
+            }
+            Process.Start(path2execute);
         }
     }
 }
